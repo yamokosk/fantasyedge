@@ -1,0 +1,39 @@
+clc; clear all; close all;
+warning off
+
+Nqb = 61;
+scenarios = 9;
+
+%notation is defined at end
+
+% qb_data = [Nqb x 10]  PID, Team, Opp, G, Ypass, TDpass, Yrush, TDrush, I, FL
+
+% def_data = [32 x 8]   TID, Yrush, TDrush, Ypass, TDpass, I, ITD, S
+         
+% nfl_data = mean(def_data(:,i))  [1 x 8]
+
+% j = columns, i = rows, 
+
+% for k = 1:scenarios
+    for i = 1:Nqb
+        for j = 1:10
+            qb(i,k) = FP1ij
+        end
+    end
+    
+    
+    
+    
+    
+% Basic deterministic equation for QBs, does not funciton, but shows layout
+% All calculations are supposed to deal with averages, but it depends on
+% what the input data is
+
+% NOTATION:
+% PID = player ID
+% Opp = opponent ID (= defense's team ID)
+% I = interceptions
+% ITD = interceptions for touchdowns
+% FL = fumbles lost per game
+% S = sacks per game
+
