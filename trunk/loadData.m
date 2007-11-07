@@ -1,126 +1,71 @@
-function pdata = loadData(week, p_home, p_away)
+function data = LoadData(week)
+% USAGE: data = LoadData(week_number)
+%   Make sure that the data files for the week have been processed by
+%   calling ProcessFiles(week_number) first.
+positions = {'qb'; 'rb'; 'wr'; 'te'; 'k'; 'def_rushing'; 'def_passing'; 'def_receiving'; };
+datadir = [cd '/data/wk' num2str(week) '/processed'];
+defaultmask = {'First', '%s'; 'Last', '%s'; 'Team', '%s'; 'Games', '%f'};
 
-C_PassYds = 1/50;
-C_RushYds = 1/25;
-C_RecYds = 1/25;
-C_PassTD = 6;
-C_RushTD = 6;
-C_RecTD = 6;
-C_Int = -2;
-C_FumL = -2;
-C_FGShort = 3;
-C_FGMed = 4;
-C_FGLong = 5;
+% QB
+n = 1;
+mask = [defaultmask; {'PassYds', '%f'; 'PassTD', '%f'; 'RushYds', '%f'; 'RushTD', '%f'; 'Int', '%f'}];
+fname = [positions{n} '_week_' num2str(week) '.data'];
+data.(positions{n}) = loadFFFile( fullfile(datadir, fname), mask );
 
-pdata.senarioProbabilities = zeros(length(p_home) * length(p_away), 1);
-k = 1;
-for m = 1:length(p_home)
-    for n = 1:length(p_away)
-        pdata.senarioProbabilities(k) = p_home(m) * p_away(n);
-        k = k + 1;
-    end
-end
-ns = length(pdata.senarioProbabilities);
+% RB
+n = 2;
+mask = [defaultmask; {'RushYds', '%f'; 'RushTD', '%f'; 'RecYds', '%f'; 'RecTD', '%f'; 'FumL', '%f'}];
+fname = [positions{n} '_week_' num2str(week) '.data'];
+data.(positions{n}) = loadFFFile( fullfile(datadir, fname), mask );
 
-[data, matchups] = loadDataFromFiles(week);
+% WR
+n = 3;
+mask = [defaultmask; {'RecYds', '%f'; 'RecTD', '%f'; 'FumL', '%f'}];
+fname = [positions{n} '_week_' num2str(week) '.data'];
+data.(positions{n}) = loadFFFile( fullfile(datadir, fname), mask );
 
-npos = zeros(6,1);
-npos(1) = data.qb.num;
-npos(2) = data.rb.num;
-npos(3) = data.wr.num;
-npos(4) = data.te.num;
-npos(5) = data.k.num;
-npos(6) = 32;
+% TE
+n = 4;
+mask = [defaultmask; {'RecYds', '%f'; 'RecTD', '%f'; 'FumL', '%f'}];
+fname = [positions{n} '_week_' num2str(week) '.data'];
+data.(positions{n}) = loadFFFile( fullfile(datadir, fname), mask );
 
-np = sum(npos);
-perf = zeros(np, ns);
+% K
+n = 5;
+mask = [defaultmask; {'FG19', '%f'; 'FG29', '%f'; 'FG39', '%f'; 'FG49', '%f'; 'FG50', '%f'; 'XPM', '%f'}];
+fname = [positions{n} '_week_' num2str(week) '.data'];
+data.(positions{n}) = loadFFFile( fullfile(datadir, fname), mask );
 
-% Lookup data
-k = 1;
-for k = 1:length(senarios)
+% def_rushing
+n = 6;
+mask = {'Team', '%s'; 'Games', '%f'; 'RushYds', '%f'; 'RushTD', '%f'};
+fname = [positions{n} '_week_' num2str(week) '.data'];
+data.(positions{n}) = loadFFFile( fullfile(datadir, fname), mask );
+
+% def_passing
+n = 7;
+mask = {'Team', '%s'; 'Games', '%f'; 'PassYds', '%f'; 'PassTD', '%f'; 'Int', '%f'};
+fname = [positions{n} '_week_' num2str(week) '.data'];
+data.(positions{n}) = loadFFFile( fullfile(datadir, fname), mask );
+
+% def_receiving
+n = 8;
+mask = {'Team', '%s'; 'Games', '%f'; 'RecYds', '%f'; 'RecTD', '%f'};
+fname = [positions{n} '_week_' num2str(week) '.data'];
+data.(positions{n}) = loadFFFile( fullfile(datadir, fname), mask );
+
     
-    for i = 1:length(npos)
-        posname = positions{i};
-        
-        for j = 1:length(npos(i))
-            
-            [opp, home] = getOpponent(data.(posname).team(j), matchups);
-            [rushYdsK, rushTDK, recYdsK, recTDK, passYdsK, passTDK, IntK, FumLK] = ...
-                getDefStats(opp, data.def_rushing, data.def_receiving, data.def_passing);
-                
-            switch (posname)
-                case 'qb'
-                    perf(ptr+j,k) = C_PassYds * data.(posname).PassYds(j) * PassYdsK + ...
-                                C_PassTD * data.(posname).PassTD(j) * PassTDK + ...
-                                C_RushYds * data.(posname).RushYds(j) * RushYdsK + ...
-                                C_RushTD * data.(posname).RushTD(j) * RushTDK + ...
-                                C_Int * data.(posname).Int(j) * IntK;
-                case {'wr','te'}
-                    perf(ptr+j,k) = C_RecYds * data.(posname).RecYds(j) * RecYdsK + ...
-                                C_RecTD * data.(posname).RecTD(j) * RecTDK + ...
-                                C_FumL * data.(posname).FumL(j) * FumLK;
-                case 'rb'
-                    perf(ptr+j,k) = C_RecYds * data.(posname).RecYds(j) * RecYdsK + ...
-                                C_RecTD * data.(posname).RecTD(j) * RecTDK + ...
-                                C_RushYds * data.(posname).RushYds(j) * RushYdsK + ...
-                                C_RushTD * data.(posname).RushTD(j) * RushTDK + ...
-                                C_FumL * data.(posname).FumL(j) * FumLK;
-                case 'k'
-                    perf(ptr+j,k) = C_FGShort * data.(posname).FG19(j) + ...
-                                C_FGShort * data.(posname).FG29(j) + ...
-                                C_FGShort * data.(posname).FG39(j) + ...
-                                C_FGMed * data.(posname).FG49(j) + ...
-                                C_FGLong * data.(posname).FG50(j) + ...
-                                C_XPM * data.(posname).XPM(j);
-                case 'def'
-                    perf(ptr+j,k) = -C_Int * data.def_passing.Int(j);
-            end
-        end
+% Matchup data
+fid = fopen( fullfile(datadir, ['matchup_week_' num2str(week) '.data']) );
+expr = '(?<away>\w+)\s+@\s+(?<home>\w+)';
+matchups = {};
+while 1
+    tline = fgetl(fid);
+    if ~ischar(tline) break; end
+    
+    [tokens, game] = regexp(tline, expr, 'tokens', 'names');
+    
+    if ~isempty(tokens)
+        matchups = [matchups; {game.home, game.away}];
     end
 end
-
-
-function [opp, home] = getOpponent(team, matchups)
-
-hometeams = matchups(:,1);
-awayteams = matchups(:,2);
-
-ind = find( strcmp(hometeams, team) );
-
-if (~isempty(ind))
-    home = true;
-    opp = hometeams{ind};
-    return;
-end
-
-ind = find( strcmp(awayteams, team) );
-
-if (~isempty(ind))
-    home = false;
-    opp = awayteams(ind);
-    return;
-end
-
-home = true;
-opp = 'BYE';
-
-
-function [rushYdsK, rushTDK, recYdsK, recTDK, passYdsK, passTDK, IntK, FumLK] = ...
-    getDefStats(opp, def_rushing, def_receiving, def_passing)
-
-rushind = find( strcmp(opp, def_rushing.Team) );
-passind = find( strcmp(opp, def_receiving.Team) );
-recind = find( strcmp(opp, def_passing.Team) );
-
-PassYdsBar = mean(data.def_passing.PassYds);
-PassTDBar = mean(data.def_passing.PassTD);
-IntBar = mean(data.def_passing.Int);
-RushYdsBar = mean(data.def_rushing.RushYds);
-RushTDBar = mean(data.def_rushing.RushTD);
-RecYdsBar = mean(data.def_receiving.RecYds);
-RecTDBar = mean(data.def_receiving.RecTD);
-
-rushYdsK = def_rushing.RushYds  rushTDK, recYdsK, recTDK, passYdsK, passTDK, IntK, FumLK
-
-
-
