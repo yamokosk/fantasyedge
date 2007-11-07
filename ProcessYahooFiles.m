@@ -20,8 +20,7 @@ for n = 1:length(positions)
     fout = fopen( fullfile(cd, 'data', ['wk' num2str(week)], 'processed', fname), 'w');
     
     % Fix the header
-    header = fgetl(fin);
-    header = regexprep(header, 'Name\s+Opp\s+Action', 'Name	Home	Opp');
+    header = FixHeader(fgetl(fin));
     fprintf(fout, '%s\n', header);
     
     while (~feof(fin))
@@ -76,3 +75,21 @@ for n = 1:length(positions)
     fclose(fin);
     fclose(fout);
 end
+
+
+function header = FixHeader(header)
+header = regexprep(header, 'Name\s+Opp\s+Action', 'Name	Home	Opp');
+header = regexprep(header, 'Pass\s+Yds', 'PassYds');
+header = regexprep(header, 'Rush\s+Yds', 'RushYds');
+header = regexprep(header, 'Rec\s+Yds', 'RecYds');
+header = regexprep(header, 'Fum\s+Lost', 'FumLost');
+header = regexprep(header, 'FG\s+0\-19', 'FG19');
+header = regexprep(header, 'FG\s+0\-29', 'FG29');
+header = regexprep(header, 'FG\s+0\-39', 'FG39');
+header = regexprep(header, 'FG\s+0\-49', 'FG49');
+header = regexprep(header, 'FG\s+0\-50\+', 'FG50');
+header = regexprep(header, 'PAT\s+Made', 'PAM');
+header = regexprep(header, 'Fum\s+Rec', 'FumRec');
+header = regexprep(header, 'Blk\s+Kick', 'BlkKick');
+header = regexprep(header, 'Pts\s+Allow', 'PtsAllow');
+    

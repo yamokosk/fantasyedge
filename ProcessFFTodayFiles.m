@@ -20,8 +20,8 @@ for n = 1:length(positions)
     fin = fopen( fullfile(cd, 'data', ['wk' num2str(week)], 'raw', fname) );
     fout = fopen( fullfile(cd, 'data', ['wk' num2str(week)], 'processed', fname), 'w');
     
-    % Write a new file header
-    header = fgetl(fin);
+    % Fix the file header
+    header = FixHeader(fgetl(fin));
     fprintf(fout, '%s\n', header);
     
     while (~feof(fin))
@@ -44,3 +44,7 @@ for n = 1:length(positions)
     fclose(fin);
     fclose(fout);
 end
+
+
+function header = FixHeader(header)
+header = regexprep(header, '\/', 'P');
