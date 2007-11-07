@@ -1,5 +1,7 @@
-function [data, matchups] = loadDataFromFiles(week)
-
+function data = LoadData(week)
+% USAGE: data = LoadData(week_number)
+%   Make sure that the data files for the week have been processed by
+%   calling ProcessFiles(week_number) first.
 positions = {'qb'; 'rb'; 'wr'; 'te'; 'k'; 'def_rushing'; 'def_passing'; 'def_receiving'; };
 datadir = [cd '/data/wk' num2str(week) '/processed'];
 defaultmask = {'First', '%s'; 'Last', '%s'; 'Team', '%s'; 'Games', '%f'};
