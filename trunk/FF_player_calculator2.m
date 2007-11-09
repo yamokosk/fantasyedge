@@ -1,43 +1,44 @@
 clc; clear all; close all;
 warning off
 
-Nqb = 61;
-scenarios = 9;
 
-%notation is defined at end
 
-% qb_data = [Nqb x 10]  PID, Team, Opp, G, Ypass, TDpass, Yrush, TDrush, I, FL
+%player columns (5):  player, H/A, opp, FP, P
+%def columns (7):  team, qb, rb, wr, te, k, def
 
-% def_data = [32 x 8]   TID, Yrush, TDrush, Ypass, TDpass, I, ITD, S
-         
-% nfl_data = mean(def_data(:,i))  [1 x 8]
+Nqb = length(qb_data(:,1));
+Nrb = length(rb_data(:,1));
+Nwr = length(wr_data(:,1));
+Nte = length(te_data(:,1));
+Nk = length(k_data(:,1));
+Ndef = length(def_data(:,1));
+Nsc = 9;
 
-% j = columns, i = rows, 
+nflVqb = mean(def_data(:,2));
+nflVrb = mean(def_data(:,3));
+nflVwr = mean(def_data(:,4));
+nflVte = mean(def_data(:,5));
+nflVk = mean(def_data(:,6));
+nflVdef = mean(def_data(:,7));
 
-% for k = 1:scenarios
-    for i = 1:Nqb
-        for j = 1:10
-            qb(i,k) = (1/50)*((def_data(qb_data(i,3), 4)/(nfl_data(1,4)))*qb_data(i,5))+
-            6*((def_data(qb_data(i,3), 5)/(nfl_data(1,5)))*qb_data(i,6))+
-            (1/20)*((def_data(qb_data(i,3), 2)/(nfl_data(1,2)))*qb_data(i,7))+
-            6*((def_data(qb_data(i,3), 3)/(nfl_data(1,3)))*qb_data(i,8))-
-            2*(((def_data(qb_data(i,3), 6)/(nfl_data(1,6)))*qb_data(i,9))+qb_data(i,10))
+sc = [0.15 0.1; 0.15 0; 0.15 -0.1; 0.05 0.1; 0.05 0; 0.05 -0.1; -0.05 0.1; -0.05 0; -0.05 -0.1];
+
+% j = columns (scenarios), i = rows (players), k = defense row in def_data
+
+for i = 1:Nqb
+    k =  %find the corresponding defense to the player's opponent and give the row location
+    for j = 1:9
+        if qb_data(i,2) == 1
+            qb(i,j) = (1+sc(1,j))*(1-sc(2,j))*qb_data(i,4)*(def_data(k,2)/nflVqb);
+        else
+            qb(i,j) = (1-sc(1,j))*(1+sc(2,j))*qb_data(i,4)*(def_data(k,2)/nflVqb);
         end
     end
-    
-    
-    
-    
-    
-% Basic deterministic equation for QBs, does not funciton, but shows layout
-% All calculations are supposed to deal with averages, but it depends on
-% what the input data is
+end
 
-% NOTATION:
-% PID = player ID
-% Opp = opponent ID (= defense's team ID)
-% I = interceptions
-% ITD = interceptions for touchdowns
-% FL = fumbles lost per game
-% S = sacks per game
 
+
+
+% binary integer programming problem optimization
+bintprog(f,A,b)
+    
