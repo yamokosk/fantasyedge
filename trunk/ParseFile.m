@@ -35,8 +35,7 @@ for n = 1:length(availableHeaders)
         format = [format, '%*s'];
     end
 end
-availableHeaders
-format
+
 rawdata = textscan(fid, format, 'multipleDelimsAsOne', 1, 'headerLines', 0);
 
 for n = 1:length(colHeaders)
