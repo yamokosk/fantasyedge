@@ -11,9 +11,9 @@ for n = 1:length(positions)
 
     % Number of players in this position
     np = length(pdata.(positions(n)).Name);
-    
     % Initialize output data structure
     proj = zeros(np, ns);
+
     % For each player..
     for p = 1:np
         % Lookup opponent pts allowed
