@@ -6,13 +6,14 @@ function [pdata, ddata] = LoadFFData(week)
 
 % AUTHOR: J.D. Yamokoski
 % DATE: 11/7/2007
+% MODIFIED: 11/20/2007
 
 positions = {'qb'; 'rb'; 'wr'; 'te'; 'k'; 'def' };
 datadir = [cd '/data/wk' num2str(week) '/processed'];
 pdata = []; ddata = [];
 
 % Get player data
-playermask = {'Name', '%s'; 'Home', '%d'; 'Opp', '%s'; 'Price', '%f'; 'AVG', '%f'};
+playermask = {'Name', '%s'; 'Home', '%d'; 'Opp', '%s'; 'Price', '%f'; 'AVG', '%f'; 'PTS', '%f'};
 for n = 1:length(positions)
     fname = [positions{n} '.yahoo'];
     pdata.(positions{n}) = ParseFile( fullfile(datadir, fname), playermask );

@@ -3,6 +3,7 @@ function ProcessYahooFiles(week)
 
 % AUTHOR: J.D. Yamokoski
 % DATE: 11/7/2007
+% MODIFIED: 11/20/2007
 
 positions = {'qb'; 'rb'; 'wr'; 'te'; 'k'; 'def'};
 
@@ -59,7 +60,7 @@ for n = 1:length(positions)
             % Replace stuff like:
             %   Detroit (Det - DEF) with Detroit
             %   P. Manning (Ind - QB) with P.Manning
-            expr = '(?<firstI>[A-Z,a-z]\.)\s+(?<lastN>\w+)|(?<firstI>\w+)\s\(';
+            expr = '(?<firstI>[A-Z,a-z]+\.)\s+(?<lastN>\w+)|(?<firstI>\w+)\s\(';
             [tokens, names] = regexp(line, expr, 'tokens', 'names');
             
             % Find the ')'
