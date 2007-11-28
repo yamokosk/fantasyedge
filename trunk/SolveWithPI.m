@@ -1,7 +1,6 @@
-function [xopt, fopt] = SolveWithPI(wk)
+function [xopt, fopt, pdata] = SolveWithPI(wk, pdata)
 
 % Load player data
-pdata = LoadFFData(wk);
 pdata = CalcFuturePts(pdata,LoadFFData(wk+1));
 
 % Cost function coefficients
@@ -33,9 +32,9 @@ b = 100;    % Salary cap limit
 
 % Compute optimal team
 % Optimization options
-opts = optimset('bintprog');
-opts = optimset(opts, 'Display', 'iter');
-[xopt, fopt] = bintprog(-f,A,b,Aeq,beq,zeros(np,1),opts);
+% opts = optimset(@bintprog);
+% opts = optimset(opts, 'Display', 'iter');
+[xopt, fopt] = bintprog(-f,A,b,Aeq,beq,zeros(np,1));%,opts);
 ind = find(xopt == 1);
 
 fprintf('\nOptimal fantasy team.\n');
