@@ -1,4 +1,4 @@
-function [xopt, ff] = SolveStochastic(lambda, beta, pdata, ddata)
+function [zopt, ff] = SolveStochastic(lambda, beta, pdata, ddata, scenarioMatrix)
 % Variables to tune optimization
 %   lambda - Risk measure. 1 - Very risky, 0 - No risk
 %   beta - percentile
@@ -9,8 +9,8 @@ maxTime = 120;
 % -------------------------------------------------------------------------
 
 % Load player data
-scenarios = ProcessPlayerData(pdata,ddata);
-scenarioMatrix = cell2mat( struct2cell( scenarios ) );
+%scenarios = ProcessPlayerData(pdata,ddata);
+%scenarioMatrix = cell2mat( struct2cell( scenarios ) );
 np = size(scenarioMatrix,1);    % Total number of players
 nqb = length(pdata.qb.Name);    % Number of qb
 nrb = length(pdata.rb.Name);    % Number of rb
@@ -25,7 +25,7 @@ pk = repmat(1/ns,ns,1);         % Scenario probabilities
 names = [pdata.qb.Name; pdata.rb.Name; pdata.wr.Name; pdata.te.Name; pdata.k.Name; pdata.def.Name];
 
 % Expected performance
-w_bar = mean(scenarioMatrix, 2);
+w_bar = [pdata.qb.AVG; pdata.rb.AVG; pdata.wr.AVG; pdata.te.AVG; pdata.k.AVG; pdata.def.AVG];
 
 % Player cost
 c = [pdata.qb.Price; pdata.rb.Price; pdata.wr.Price; pdata.te.Price; pdata.k.Price; pdata.def.Price];
@@ -111,21 +111,24 @@ Prob = mipAssign(-1*f, A, bL, bU, yL, yU, [], 'FFLineUp',...
 Prob.MaxCPU = maxTime;
 Prob.optParam.IterPrint = 0;
 Result = mipSolve(Prob);
-xopt = Result.x_k;
-ff = w_bar' * xopt(11:end);
-% fprintf('Solution found in %f seconds.\n', stop);
-% fprintf('\nVaR(%.1f): %g\n', beta*100, Result.x_k(1));
-% fprintf('\nZs: [%f, %f, ... , %f, %f]\n', Result.x_k(2), Result.x_k(3), Result.x_k(9), Result.x_k(10));
-% fprintf('\nFopt: %g\n', Result.f_k);
-% fprintf('\nOptimal fantasy team.\n');
-% % for n = 1:length(ind)
-% %     fprintf('\t%s\n', names{ind(n)});
-% % end
-% fprintf('\tQB: %s\n', pdata.qb.Name{ind(1)});
-% fprintf('\tRB: %s, %s\n', pdata.rb.Name{ind(2)-nqb}, pdata.rb.Name{ind(3)-nqb});
-% fprintf('\tWR: %s, %s, %s\n', pdata.wr.Name{ind(4)-nqb-nrb}, pdata.wr.Name{ind(5)-nqb-nrb}, pdata.wr.Name{ind(6)-nqb-nrb});
-% fprintf('\tTE: %s\n', pdata.te.Name{ind(7)-nqb-nrb-nwr});
-% fprintf('\tK: %s\n', pdata.k.Name{ind(8)-nqb-nrb-nwr-nte});
-% fprintf('\tDEF: %s\n', pdata.def.Name{ind(9)-nqb-nrb-nwr-nte-nk});
+zopt = Result.x_k;
+
+% Printing
+xopt = zopt(11:end);
+ff = w_bar' * xopt;
+ind = find(xopt == 1);
+fprintf('\nVaR(%.1f): %g\n', beta*100, Result.x_k(1));
+fprintf('\nZs: [%f, %f, ... , %f, %f]\n', Result.x_k(2), Result.x_k(3), Result.x_k(9), Result.x_k(10));
+fprintf('\nFopt: %g\n', Result.f_k);
+fprintf('\nOptimal fantasy team.\n');
+% for n = 1:length(ind)
+%     fprintf('\t%s\n', names{ind(n)});
+% end
+fprintf('\tQB: %s\n', pdata.qb.Name{ind(1)});
+fprintf('\tRB: %s, %s\n', pdata.rb.Name{ind(2)-nqb}, pdata.rb.Name{ind(3)-nqb});
+fprintf('\tWR: %s, %s, %s\n', pdata.wr.Name{ind(4)-nqb-nrb}, pdata.wr.Name{ind(5)-nqb-nrb}, pdata.wr.Name{ind(6)-nqb-nrb});
+fprintf('\tTE: %s\n', pdata.te.Name{ind(7)-nqb-nrb-nwr});
+fprintf('\tK: %s\n', pdata.k.Name{ind(8)-nqb-nrb-nwr-nte});
+fprintf('\tDEF: %s\n', pdata.def.Name{ind(9)-nqb-nrb-nwr-nte-nk});
 % fprintf('\t---------\n');
-% fprintf('\tPts: %g\tCost: %g\n\n', w_bar'*xopt, c'*xopt);
+fprintf('\tPts: %g\tCost: %g\n\n', w_bar'*xopt, c'*xopt);

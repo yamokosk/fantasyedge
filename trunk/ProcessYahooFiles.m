@@ -18,63 +18,65 @@ for n = 1:length(positions)
 
     % Get some file pointers
     fin = fopen( fullfile(cd, 'data', ['wk' num2str(week)], 'raw', fname) );
-    fout = fopen( fullfile(cd, 'data', ['wk' num2str(week)], 'processed', fname), 'w');
-    
-    % Fix the header
-    header = FixHeader(fgetl(fin));
-    fprintf(fout, '%s\n', header);
-    
-    while (~feof(fin))
-        % Get a line of text from the input file..
-        line = fgetl(fin);
-        
-        % Look for any of the following.. NA, IR, O, Bye after the player's
-        % name. If it exists then skip that player
-        bContinue = true;
-        expr = {'[A-Z]\w*NA', '[A-Z]\w*O', '[A-Z]\w*IR', '\s*Bye\s*'};
-        for n = 1:length(expr)
-            str = regexp(line, expr{n});
-            if ~isempty(str)
-                bContinue = false;
-                break;
+    if (fin > 0)
+        fout = fopen( fullfile(cd, 'data', ['wk' num2str(week)], 'processed', fname), 'w');
+
+        % Fix the header
+        header = FixHeader(fgetl(fin));
+        fprintf(fout, '%s\n', header);
+
+        while (~feof(fin))
+            % Get a line of text from the input file..
+            line = fgetl(fin);
+
+            % Look for any of the following.. NA, IR, O, Bye after the player's
+            % name. If it exists then skip that player
+            bContinue = true;
+            expr = {'[A-Z]\w*NA', '[A-Z]\w*O', '[A-Z]\w*IR', '\s*Bye\s*'};
+            for n = 1:length(expr)
+                str = regexp(line, expr{n});
+                if ~isempty(str)
+                    bContinue = false;
+                    break;
+                end
+            end
+
+            if (bContinue)
+                % Replace the long team name with its Yahoo abbreviation
+                for m=1:length(nameLookup{1})
+                    line = regexprep(line, nameLookup{1}(m), nameLookup{2}(m));
+                end
+
+                % Determine if the player is home or away (look for the @)
+                bHomeGame = false;
+                if (isempty(findstr(line, '@')))
+                    bHomeGame = true;
+                end
+
+                % Strip out $, @, and [ BUY ]
+                line = regexprep(line, '\$', '');
+                line = regexprep(line, '\@', '');
+                line = regexprep(line, '\[\s+BUY\s+\]', '');
+
+                % Replace stuff like:
+                %   Detroit (Det - DEF) with Detroit
+                %   P. Manning (Ind - QB) with P.Manning
+                expr = '(?<firstI>[A-Z,a-z]+\.)\s+(?<lastN>\w+)|(?<firstI>\w+)\s\(';
+                [tokens, names] = regexp(line, expr, 'tokens', 'names');
+
+                % Find the ')'
+                loc = findstr(line, ')');
+
+                if (~isempty(loc))
+                    newname = [names(1).firstI names(1).lastN];
+                    % Lastly write the new line to the out file
+                    fprintf(fout, '%s\t%d\t%s\n', newname, bHomeGame, line(loc+1:end));
+                end
             end
         end
-        
-        if (bContinue)
-            % Replace the long team name with its Yahoo abbreviation
-            for m=1:length(nameLookup{1})
-                line = regexprep(line, nameLookup{1}(m), nameLookup{2}(m));
-            end
-            
-            % Determine if the player is home or away (look for the @)
-            bHomeGame = false;
-            if (isempty(findstr(line, '@')))
-                bHomeGame = true;
-            end
-            
-            % Strip out $, @, and [ BUY ]
-            line = regexprep(line, '\$', '');
-            line = regexprep(line, '\@', '');
-            line = regexprep(line, '\[\s+BUY\s+\]', '');
-            
-            % Replace stuff like:
-            %   Detroit (Det - DEF) with Detroit
-            %   P. Manning (Ind - QB) with P.Manning
-            expr = '(?<firstI>[A-Z,a-z]+\.)\s+(?<lastN>\w+)|(?<firstI>\w+)\s\(';
-            [tokens, names] = regexp(line, expr, 'tokens', 'names');
-            
-            % Find the ')'
-            loc = findstr(line, ')');
-            
-            if (~isempty(loc))
-                newname = [names(1).firstI names(1).lastN];
-                % Lastly write the new line to the out file
-                fprintf(fout, '%s\t%d\t%s\n', newname, bHomeGame, line(loc+1:end));
-            end
-        end
+        fclose(fin);
+        fclose(fout);
     end
-    fclose(fin);
-    fclose(fout);
 end
 
 

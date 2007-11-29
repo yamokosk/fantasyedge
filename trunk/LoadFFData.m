@@ -22,9 +22,9 @@ for n = 1:length(positions)
     % number of games played is not tracked by Yahoo (current source of
     % player data). So I will use the ratio of the player's avg pts to
     % their total points.
-	pdata.(positions{n}).ratio = pdata.(positions{n}).AVG ./ pdata.(positions{n}).PTS;
-    ind = find( pdata.(positions{n}).ratio > 0.2 );
-    pdata.(positions{n}).AVG(ind) = 0.0;    
+% 	pdata.(positions{n}).ratio = pdata.(positions{n}).AVG ./ pdata.(positions{n}).PTS;
+%     ind = find( pdata.(positions{n}).ratio > 0.2 );
+%     pdata.(positions{n}).AVG(ind) = 0.0;    
 end
 
 % Get def data
