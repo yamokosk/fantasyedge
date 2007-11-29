@@ -11,21 +11,26 @@ maxTime = 120;
 % Load player data
 %scenarios = ProcessPlayerData(pdata,ddata);
 %scenarioMatrix = cell2mat( struct2cell( scenarios ) );
-np = size(scenarioMatrix,1);    % Total number of players
+[np,ns] = size(scenarioMatrix);    % Total number of players and scenarios
 nqb = length(pdata.qb.Name);    % Number of qb
 nrb = length(pdata.rb.Name);    % Number of rb
 nwr = length(pdata.wr.Name);    % Number of wr
 nte = length(pdata.te.Name);    % Number of te
 nk = length(pdata.k.Name);      % Number of k
 ndef = length(pdata.def.Name);  % Number of def 
-ns = size(scenarioMatrix,2);    % Number of scenarios
-pk = repmat(1/ns,ns,1);         % Scenario probabilities
+
+% Scenario probabilities
+% pk = inv(ns) * ones(ns,1);  % All equally probable
+a = 0.6180339887;
+z = [(ns-1):-1:0]';
+pk = (1-a)*a.^z;
+pk = pk ./ sum(pk);        % Exponentially forgetting
 
 % Player names (for conveinence)
 names = [pdata.qb.Name; pdata.rb.Name; pdata.wr.Name; pdata.te.Name; pdata.k.Name; pdata.def.Name];
 
 % Expected performance
-w_bar = [pdata.qb.AVG; pdata.rb.AVG; pdata.wr.AVG; pdata.te.AVG; pdata.k.AVG; pdata.def.AVG];
+w_bar = scenarioMatrix*pk; %[pdata.qb.AVG; pdata.rb.AVG; pdata.wr.AVG; pdata.te.AVG; pdata.k.AVG; pdata.def.AVG];
 
 % Player cost
 c = [pdata.qb.Price; pdata.rb.Price; pdata.wr.Price; pdata.te.Price; pdata.k.Price; pdata.def.Price];
