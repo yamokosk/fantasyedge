@@ -38,7 +38,7 @@ for n = 1:length(positions)
     end
     scenarios.(positions{n}) = proj;
 end
-
+s = cell2mat( struct2cell( scenarios ) );
 % binary integer programming problem optimization
 %bintprog(f,A,b)
     
