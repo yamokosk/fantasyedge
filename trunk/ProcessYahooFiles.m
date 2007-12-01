@@ -32,12 +32,20 @@ for n = 1:length(positions)
             % Look for any of the following.. NA, IR, O, Bye after the player's
             % name. If it exists then skip that player
             bContinue = true;
-            expr = {'[A-Z]\w*NA', '[A-Z]\w*O', '[A-Z]\w*IR', '[A-Z]\w*D', '\s*Bye\s*'};
-            for n = 1:length(expr)
-                str = regexp(line, expr{n});
-                if ~isempty(str)
-                    bContinue = false;
-                    break;
+            expr = ['\s*Bye\s*'];
+            str = regexp(line, expr);
+            if ~isempty(str)
+                bContinue = false;
+            end
+
+            if (n ~= 6) % Player status.. don't  check this for DEF
+                expr = {'[A-Z]\w*NA', '[A-Z]\w*O', '[A-Z]\w*IR', '[A-Z]\w*D'};
+                for n = 1:length(expr)
+                    str = regexp(line, expr{n});
+                    if ~isempty(str)
+                        bContinue = false;
+                        break;
+                    end
                 end
             end
 
