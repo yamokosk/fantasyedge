@@ -92,8 +92,7 @@ Result = mipSolve(Prob);
 yopt = Result.x_k;
 
 if (Result.ExitFlag == 0)
-    pndata = LoadFFData(week+1);
-    PrintTeamStats(yopt,pdata,pndata,alpha,f,pk,scenarioMatrix)
+    PrintTeamStats(yopt,pdata,week,alpha,f,pk,scenarioMatrix)
 else
     fprintf('Solution not found. Reason: %d\n', Result.ExitFlag);
 end

@@ -1,4 +1,4 @@
-function PrintTeamStats(y,pdata,pndata,alpha,f,pk,scenarioMatrix)
+function PrintTeamStats(y,pdata,week,alpha,f,pk,scenarioMatrix)
 
 [np,ns] = size(scenarioMatrix);    % Total number of players
 nqb = length(pdata.qb.Name);    % Number of qb
@@ -7,14 +7,12 @@ nwr = length(pdata.wr.Name);    % Number of wr
 nte = length(pdata.te.Name);    % Number of te
 nk = length(pdata.k.Name);      % Number of k
 offset = [0; -nqb; -nqb; -nqb-nrb; -nqb-nrb; -nqb-nrb; -nqb-nrb-nwr; -nqb-nrb-nwr-nte; -nqb-nrb-nwr-nte-nk];
-%ndef = length(pdata.def.Name);  % Number of def 
 
 % Get actual player results
-pdata = CalcFuturePts(pdata, pndata);
+pdata = CalcFuturePts(pdata, week);
 w_bar = scenarioMatrix*pk;
 c = [pdata.qb.Price; pdata.rb.Price; pdata.wr.Price; pdata.te.Price; pdata.k.Price; pdata.def.Price];
 w_actual = [pdata.qb.Actual; pdata.rb.Actual; pdata.wr.Actual; pdata.te.Actual; pdata.k.Actual; pdata.def.Actual];
-%f = [lambda-1,  (lambda-1)*inv(1-alpha)*pk', lambda*w_bar'];
 
 % Pull out variables from y
 VaR = y(1);
@@ -23,11 +21,11 @@ x = y(ns+2:end);
 
 % Calculate team stats
 CVaR = VaR + inv(1-alpha)*pk'*zk;
-ffa = w_actual' * x;
 ffp = w_bar' * x;
 cost = c'*x;
 ind = find(x == 1);
 ptr = ind + offset;
+ffa = sum(w_actual(ind));
 
 fprintf('\nOptimal fantasy team.\n');
 fprintf('QB \t%s \t%3.2f\t%3.2f\t$%4.2f\n', pdata.qb.Name{ptr(1)}, w_bar(ind(1)), pdata.qb.Actual(ptr(1)), pdata.qb.Price(ptr(1)) );
