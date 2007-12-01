@@ -1,7 +1,11 @@
-function FFPstd = CalcPlayerSTD(week)
+function FFPstd = CalcPlayerSTD(week,outofsample)
 
-phist = [];
-for n = 1:week
+phist = []; uptoweek = week;
+if (outofsample)
+    uptoweek = week - 1;
+end
+
+for n = 1:uptoweek
     phist{n} = LoadIPData(n);
 end
 
@@ -15,7 +19,7 @@ for n = 1:length(positions)
         name = pdata.(positions{n}).Name{p};
 		obs = 1;
 		obsvec = [];
-        for wk = 1:week
+        for wk = 1:uptoweek
             allNames = phist{wk}.(positions{n}).Name;
             nind = find( strcmp(name, allNames) );
             if ~isempty(nind)

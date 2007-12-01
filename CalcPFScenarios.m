@@ -1,6 +1,6 @@
-function s = CalcPFScenarios(week,ns)
+function s = CalcPFScenarios(week,FFPstd,ns)
 
-FFPstd = CalcPlayerSTD(week);
+%FFPstd = CalcPlayerSTD(week);
 
 % rndscenarioMatrix:
 % This file just calculates the random scenarios for the week of interest,

@@ -32,7 +32,7 @@ for n = 1:length(positions)
             % Look for any of the following.. NA, IR, O, Bye after the player's
             % name. If it exists then skip that player
             bContinue = true;
-            expr = {'[A-Z]\w*NA', '[A-Z]\w*O', '[A-Z]\w*IR', '\s*Bye\s*'};
+            expr = {'[A-Z]\w*NA', '[A-Z]\w*O', '[A-Z]\w*IR', '[A-Z]\w*D', '\s*Bye\s*'};
             for n = 1:length(expr)
                 str = regexp(line, expr{n});
                 if ~isempty(str)

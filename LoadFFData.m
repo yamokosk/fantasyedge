@@ -27,9 +27,11 @@ for n = 1:length(positions)
 %     pdata.(positions{n}).AVG(ind) = 0.0;    
 end
 
-% Get def data
-defmask = {'Team', '%s'; 'FFPtsPG', '%f'};
-for n = 1:length(positions)
-    fname = ['defV' positions{n} '.fftoday'];
-    ddata.(positions{n}) = ParseFile( fullfile(datadir, fname), defmask );
+if nargout == 2
+    % Get def data
+    defmask = {'Team', '%s'; 'FFPtsPG', '%f'};
+    for n = 1:length(positions)
+        fname = ['defV' positions{n} '.fftoday'];
+        ddata.(positions{n}) = ParseFile( fullfile(datadir, fname), defmask );
+    end
 end
